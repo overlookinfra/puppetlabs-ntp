@@ -17,6 +17,8 @@ when 'aix'
 else
   servicename = if os[:family] == 'sles' && os[:release].start_with?('12', '15')
                   'ntpd'
+                elsif os[:family] == 'debian' && os[:release].start_with?('12')
+                  'ntpsec'
                 else
                   'ntp'
                 end
@@ -25,11 +27,13 @@ config = if os[:family] == 'redhat'
            '/etc/sysconfig/ntpd'
          elsif os[:family] == 'sles'
            '/etc/sysconfig/ntp'
+         elsif os[:family] == 'debian' && os[:release].start_with?('12')
+          '/etc/default/ntpsec'
          else
            '/etc/default/ntp'
          end
 describe 'ntp class with daemon options:', unless: UNSUPPORTED_PLATFORMS.include?(os[:family]) || (os[:release].start_with?('5') && os[:family] == 'redhat') do
-  let(:pp) { "class { 'ntp': service_enable => true, service_ensure => running, service_manage => true, service_name => '#{servicename}', user => 'ntp', daemon_extra_opts => '-g -i /var/lib/ntp' }" }
+  let(:pp) { "class { 'ntp': service_enable => true, service_ensure => running, service_manage => true, service_name => '#{servicename}', user => 'ntp', daemon_extra_opts => '-g -i /var/lib/ntpsec' }" }
 
   context 'when run' do
     it 'is successful' do # rubocop:disable RSpec/NoExpectationExample
